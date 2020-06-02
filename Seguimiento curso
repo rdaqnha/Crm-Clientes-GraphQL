@@ -1,0 +1,805 @@
+Proyecto 2
+
+CRMGraphQL
+
+Para cerrar/matar un puerto, por ejemplo 4000:
+lo buscamos con  -   fuser -n tcp 4000
+lo matamos con   - kill y el número que te indique en la busqueda
+
+
+Crear servidor GraphQL:
+
+- primero npm init para configurarlo (nombre, descripción, autor)
+
+- Instalamos Apollo  
+	npm i apollo-server
+	npm i -D nodemon
+
+- Podemos abrir la terminal y lanzar este comando para que este actualizandose el index todo el tiempo con nodemon para que se vaya actualizando la aplicación
+	npm run dev
+
+
+Al arrancar te dice una url donde podrás trabajar con GraphQL con la herramienta PlayGround
+	http://localhost:4000/
+
+
+
+MONGO
+
+Para instalar Mongo lo puedes hacer en local u online con Mongo DB Atlas sin necesidad de instalación, creando una cuenta
+Aplicación para visualización Mongo DB Compass
+
+mongo -- para ver el shell y con este puedes modificar las conexiones, bases de datos....
+
+mongod -- para arrancar el servicio
+Ctrl + C -- para parar el servicio
+
+darle todos los permisos a la carpeta db con sudo chmod 777 db/
+
+Para parar mongodb si hay otra instancia arrancada:
+(con el primero es suficiente)
+Upstart: sudo service mongodb stop
+
+Sysvinit: sudo /etc/init.d/mongodb stop
+
+para ver bases de datos en mongo:
+show dbs
+para cambiarse a una base de datos:
+use nombre_bbdd
+para ver las colecciones:
+show collections
+para salir de mongo:
+quit()
+
+MONGOOSE
+
+Se instala normal es para configurar la base de datos
+
+ROBO 3T
+
+- Descargas aplicación en su página (la versión 1.3.1 da problemas, mejor la 1.2.1)
+
+- desempaquetas:
+
+tar -xvzf robo3t-1.2.1-linux-x86_64-3e50a65.tar.gz 
+
+- vas a la carpeta bin y lo abres
+
+Creas una conexión solo cambiando el Nombre de la conexión para local
+
+
+Error:
+(node:10640) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 exit listeners added. Use emitter.setMaxListeners() to increase limit
+
+
+query {
+  obtenerCursos {
+    titulo
+  }
+  obtenerTecnologia {
+    tecnologia
+  }
+}
+
+
+query {
+  twitter {
+    ReactTweets: search(q: "ReactJS"){
+			...camposTweet
+    }
+    GraphQLTweets: search(q: "GraphQL"){
+			...camposTweet
+    }
+    JavaScriptsTweets: search(q: "JavaScript"){
+			...camposTweet
+    }
+  }
+}
+
+
+fragment camposTweet on Tweet {
+			id
+			text
+      retweet_count
+      created_at
+        user {
+          name
+          screen_name
+          description
+          tweets_count
+          followers_count
+          tweets(limit:5) {
+            text
+            retweet_count
+          }
+        }
+      
+}
+
+-------------------
+
+Paginación
+
+query {
+  hn {
+	topStories(limit: 10, offset: 0) {
+		id
+	      	title
+      		url
+	}
+  }
+}
+
+
+--------------------
+
+Poner nombre a una consulta (Esto permitirá pasarle variables)
+
+query ConsultarTweetsGraphQL {
+  twitter {
+		search(q: "GraphQL") {
+		  id
+			text
+		}
+  }
+}
+
+------------------
+
+Como pasar variables
+
+query {
+  obtenerCursos(input:{
+    tecnologia: "React"
+  }) {
+    titulo
+  }
+  obtenerTecnologia {
+    tecnologia
+  }
+}
+
+
+query ConsultarTweetsGraphQL($tweet: String!) {
+  ConsultarTweetsGraphQL {
+		search(q: $tweet) {
+		  id
+			text
+		}
+  }
+}
+
+
+Y en la parte de query variables se la pasamos así:
+
+{
+	"tweet": "GraphQL"
+}
+
+
+-------------------------
+
+Pasar más de una variable 
+
+query ConsultarTweetsGraphQL($tweet: String!, $total: Int) {
+  twitter {
+		search(q: $tweet, count: $total) {
+		  id
+			text
+		}
+  }
+}
+
+Y en la parte de query variables se la pasamos así:
+
+{
+	"tweet": "GraphQL",
+  	"total": 2
+}
+
+
+-------------------------
+
+Mutation
+
+mutation nuevoComentario($input : SetValueForKeyInput!){
+  keyValue_setValue(input: $input) {
+    clientMutationId
+    item{
+      id
+      value
+    }
+  }
+}
+
+Y en la parte de query variables se la pasamos así:
+
+{
+	"input": { 
+    		"id" : "2432424423243",
+  		"value": "Hola mis amigos",
+    		"clientMutationId": "5443243234"
+  	}
+}
+
+Esto es para leerlo
+
+query leerComentario{
+  keyValue{
+    getValue(id: "2432424423243") {
+      id
+      value
+    }
+  }
+}
+
+-----------------
+
+
+
+
+
+
+Querys y Mutations Nuevo curso:
+
+----NUEVO USUARIO-------------
+
+mutation nuevoUsuario($input: UsuarioInput) {
+	nuevoUsuario(input: $input) {
+        id
+        nombre
+        apellido
+        email
+        creado
+  }
+}
+
+- Query variables:
+{
+  "input": {
+    "nombre": "Raúl",
+    "apellido": "Dacuña",
+    "email": "correo@correo.com",
+    "password": "123456"
+  }
+}
+
+
+----AUTENTICAR USUARIO---------------
+
+mutation autenticarUsuario($input: AutenticarInput) {
+  autenticarUsuario(input: $input) {
+    token
+  }
+}
+
+- Query variables:
+{
+  "input": {
+    "email": "correo@correo.com",
+    "password": "123456"
+  }
+}
+
+
+-----OBTENER USUARIO------------
+
+query obtenerUsuario($token: String!){
+  obtenerUsuario(token: $token) {
+    id
+    nombre
+    apellido
+  }
+}
+
+- Query variables:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODA2MTA5NiwiZXhwIjoxNTg4MTQ3NDk2fQ.6Mcb243mpBEGsY_qDkLcFaR9OQ4ifjFnnJ80jM6P-rM"
+}
+
+
+-----NUEVO PRODUCTO-------------
+
+mutation nuevoProducto($input: ProductoInput) {
+  nuevoProducto (input: $input){
+  	id
+    nombre
+    existencias
+    precio
+    creado
+  }
+}
+
+- Query variables:
+
+{
+  "input": {
+    "nombre": "Tablet 10",
+    "existencias": 200,
+    "precio": 155.50
+  }
+}
+
+
+-----OBTENER PRODUCTOS----------------
+
+query obtenerProductos {
+  obtenerProductos{
+    id
+    nombre
+    existencias
+    precio
+    creado
+  }
+}
+
+
+-----OBTENER PRODUCTO-------------
+
+query obtenerProducto($id: ID!){
+  obtenerProducto(id: $id){
+    id
+    nombre
+    existencias
+  }
+}
+
+- Query variables:
+
+{
+  "id": "5ea7ecd885c0506df93fe60f"
+}
+
+
+
+-----ACTUALIZAR PRODUCTO-----------
+
+mutation actualizarProducto($id: ID!, $input: ProductoInput){
+  actualizarProducto(id: $id, input: $input){
+    id
+    nombre
+    existencias
+    precio
+  }
+}
+
+- Query variables:
+
+{
+  "id": "5ea7ecd885c0506df93fe60f",
+  "input":{
+    "nombre": "Ordenador Dell",
+    "existencias": 200,
+    "precio": 1100
+  }
+}
+
+
+-----ELIMINAR PRODUCTO------------
+
+mutation eliminarProducto($id: ID!){
+  eliminarProducto(id: $id)
+}
+
+- Query variables:
+
+{
+  "id": "5ea975627cc30375c024ea16"
+}
+
+
+-----NUEVO CLIENTE---------
+
+mutation nuevoCliente($input: ClienteInput){
+  nuevoCliente(input: $input) {
+    nombre
+    apellido
+  }
+}
+- Query variables:
+
+{
+  "input": {
+    "nombre": "Jose Luis",
+    "apellido": "García",
+    "empresa": "Empresa Dell",
+    "email": "dell@dell.com",
+    "telefono": "121223343"
+  }
+}
+- Http Headers:
+
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTk5YjBhZDA0NWMwMmFjNzE3OWNmMyIsImVtYWlsIjoidmVuZGVkb3JAdmVuZGVkb3IuY29tIiwibm9tYnJlIjoiVmVuZGVkb3IiLCJhcGVsbGlkbyI6Ik90cm8gVmVuZGVkb3IiLCJpYXQiOjE1ODgxNzM2MTIsImV4cCI6MTU4ODI2MDAxMn0.izV0Cu6xB4Z1GNC6FyAkGYIPH-bL0x9_VepWqB6fLGA"
+}
+
+
+-----OBTENER CLIENTES---------
+
+query obtenerClientes {
+  obtenerClientes{
+    id
+    nombre
+    apellido
+    empresa
+    email
+    telefono
+    creado
+    vendedor
+  }
+}
+
+
+
+-----OBTENER CLIENTES POR VENDEDOR---------
+
+query obtenerClientesVendedor {
+  obtenerClientesVendedor {
+    id
+    nombre
+    apellido
+    empresa
+    email
+  }
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----OBTENER CLIENTE POR VENDEDOR---------
+
+query obtenerCliente($id:ID!) {
+  obtenerCliente(id:$id) {
+    nombre
+    email
+  }
+}
+
+- Query variables:
+
+{
+  "id":"5ea99ab9d045c02ac7179cf2"
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----ACTUALIZAR CLIENTE SOLO SU VENDEDOR---------
+
+mutation actualizarCliente($id: ID!, $input: ClienteInput){
+  actualizarCliente(id: $id, input: $input){
+    nombre
+    email
+  }
+}
+
+- Query variables:
+
+{
+  "id": "5ea99a325aa12d29f2f71b55",
+	"input": {
+    "nombre": "Jose Luis",
+    "apellido": "García",
+    "empresa": "Empresa Dell",
+    "email": "nuevocorreo@nuevocorreo.com",
+    "telefono": "121223343"
+  }
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----ELIMINAR CLIENTE SOLO SU VENDEDOR---------
+
+mutation eliminarCliente($id: ID!){
+  eliminarCliente(id:$id)
+}
+
+- Query variables:
+
+{
+  "id": "5ea99a325aa12d22f2f71b55"
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----NUEVO PEDIDO---------
+
+mutation nuevoPedido($input: PedidoInput){
+  nuevoPedido(input: $input) {
+    id
+    cliente
+    vendedor
+    pedido{
+      id
+      cantidad
+    }
+    total
+    estado
+  }
+}
+
+- Query variables:
+
+{
+  "input": {
+    "pedido": [
+    	{
+        "id": "5ea7ecd885c0506df93fe60f",
+        "cantidad": 20
+      },
+      {
+        "id": "5ea7ee5785c0506df93fe612",
+        "cantidad": 25
+      }
+    ],
+    "total": 15000,
+    "cliente": "5ea99ab9d045c02ac7179cf2",
+    "estado": "PENDIENTE"
+  }
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----OBTENER PEDIDOS---------
+
+query obtenerPedidos {
+  obtenerPedidos{
+    id
+    pedido {
+      id
+      cantidad
+    }
+    cliente
+    vendedor
+    total
+    estado
+  }
+}
+
+
+-----OBTENER PEDIDOS VENDEDOR---------
+
+query obtenerPedidosVendedor {
+  obtenerPedidosVendedor{
+    id
+    pedido {
+      id
+      cantidad
+    }
+    cliente
+    vendedor
+    total
+    estado
+  }
+}
+
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----OBTENER PEDIDO---------
+
+query obtenerPedido($id: ID!) {
+  obtenerPedido(id: $id){
+    id
+    pedido {
+      id
+      cantidad
+    }
+    cliente
+    vendedor
+    total
+    estado
+  }
+}
+
+- Query variables:
+
+{
+  "id": "5eae6f42aec3e454b0f34bcf"
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----ACTUALIZAR PEDIDO---------
+
+mutation actualizarPedido($id: ID!, $input: PedidoInput){
+  actualizarPedido(id: $id, input: $input){
+    estado
+    id
+  }
+}
+
+- Query variables:
+
+{
+  "id": "5eae6f42aec3e454b0f34bcf",
+  "input": {
+    "estado": "COMPLETADO",
+    "cliente": "5ea99ab9d045c02ac7179cf2",
+    "pedido": [
+    	{
+        "id": "5ea7ed6e85c0506df93fe610",
+        "cantidad": 30
+      }
+    ]
+  }
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----ELIMINAR PEDIDO---------
+
+mutation eliminarPedido($id: ID!){
+  eliminarPedido(id: $id)
+}
+
+- Query variables:
+
+{
+  "id": "5eae6f42aec3e454b0f34bcf"
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+
+-----OBTENER PEDIDOS ESTADO---------
+
+query obtenerPedidosEstado($estado: String!) {
+  obtenerPedidosEstado(estado: $estado){
+    id
+    pedido {
+      id
+      cantidad
+    }
+    cliente
+    vendedor
+    total
+    estado
+  }
+}
+
+- Query variables:
+
+{
+  "estado": "PENDIENTE"
+}
+
+- Http Headers:
+{
+  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTcwMDQ3M2EzMTQyMzI3N2YyOTMxOSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJub21icmUiOiJSYcO6bCIsImFwZWxsaWRvIjoiRGFjdcOxYSIsImlhdCI6MTU4ODI1ODI4NSwiZXhwIjoxNTg4MzQ0Njg1fQ.APmiLVkSYAPYSBXmURuQlMD4wu-RoxaXbIV-SngmsM8"
+}
+
+
+-----OBTENER MEJORES CLIENTES---------
+
+query mejoresClientes {
+  mejoresClientes {
+    cliente {
+      nombre
+      email
+    }
+    total
+  }
+}
+
+
+-----OBTENER MEJORES VENDEDORES---------
+
+query mejoresVendedores {
+  mejoresVendedores {
+    vendedor {
+      nombre
+      email
+    }
+    total
+  }
+}
+
+
+-----BUSCAR PRODUCTO POR TEXTO---------
+
+query buscarProducto($texto: String!){
+  buscarProducto(texto: $texto){
+    nombre
+    existencias
+    precio
+  }
+}
+
+- Query variables:
+
+{
+  "texto": "inhalambrico"
+}
+
+
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
+
+CREAR NUEVO PROYECTO PARTE FRONT CON NEXT Y REACT
+
+- Para crear el proyecto el siguiente comando:
+
+npx create-next-app crmcliente (el nombre del proyecto en minúsculas) Después eligo la opción primera
+
+- Lanzar el proyecto
+
+npm run dev (lo hace por defecto en el puerto 3000 si se quiere cambiar se puede hacer en el package solo con "dev": "next dev -p 5000" en esa línea)
+
+- Trabajamos con librerias para estilo:
+	Normalize
+	Tailwindcss
+
+
+
+- Instalación de Apolo para cliente y node-fetch (para conectarse y poder hacer llamadas de un servidor a otro. Ej: localhost:4000 localhost:5000)
+
+npm i @apollo/client node-fetch
+
+- Configuraciones
+
+	- creamos carpeta config y dentro el archivo apollo.js. En esté ira la configuración para el cliente de Apollo
+	- El archivo de configuración del proyecto no existe (esta oculto) para poder configurarlo tenemos que crear un archivo que lo sobreescribira:
+		- Se llamara _app.js y en el tomaremos (Component, pageProps) del archivo original para sobreescribirlo y adaptarlo para la conexión
+
+
+DEPLOYMENT
+
+- Lo haremos con Heroku, es gratuito. Te das de alta y ya lo tendrías
+- Despues hay que instalar el CLI de Heroku, es esta página: https://devcenter.heroku.com/
+	- Instalas el CLI sudo snap install --classic heroku
+	- Poniendo heroku tienen que aparecer las opciones de este para ver que se hizo correctamente, despues ponemos herocu login y te dice que si abre tu CLI con un navegador, le damos enter, damos a login y te logea.
+- En la terminal escribimos heroku create --remote production para cree la aplicación de heroku
+- Despues hay que hacer un push del nuevo código con lo de heroku. git push production master (esto tarda)
+- Tenemos que meter las variables de entorno. Esto sería pulsando en la aplicación de heroku - settings -- reveal config vars. Introducimos nuestras variables
+- Despues pulsando arriba en el botón Open App nos abre una nueva Url, en este caso: https://hidden-ravine-19496.herokuapp.com/ Y en está url veremos nuestra app en el futuro
+- Tambien pudemos pulsar en More - View Logs y veremos como corre nuestra aplicación
+	
+	
+
+		
+
+
+
+
+
+
+
+ 
+
