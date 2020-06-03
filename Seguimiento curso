@@ -790,6 +790,16 @@ DEPLOYMENT
 - Tenemos que meter las variables de entorno. Esto sería pulsando en la aplicación de heroku - settings -- reveal config vars. Introducimos nuestras variables
 - Despues pulsando arriba en el botón Open App nos abre una nueva Url, en este caso: https://hidden-ravine-19496.herokuapp.com/ Y en está url veremos nuestra app en el futuro
 - Tambien pudemos pulsar en More - View Logs y veremos como corre nuestra aplicación
+
+- Ahora en esta parte vamos a ver el cliente de next:
+- Accederemos a esta página: https://vercel.com/download antiguamente https://zeit.co/download y aquí tendras que registrarte(es gratis) y ver la manera de instalación. En este caso: sudo npm i -g vercel
+- Una vez instalado tienes que poner en la consola de comandos: vercel login  .Esto te pedirá tu email, con el que te diste de alta (rdaqnha@gmail.com) te pedirá una confirmación enviada al mail y conectará
+- Después vamos al proyecto de crmcliente y accedemos al archivo /config/apollo.js y modificamos la uri que teniamos de apollo uri: 'http://localhost:4000/' por la que nos dio Eroku uri: 'https://hidden-ravine-19496.herokuapp.com/'
+- Hay que importar el proyecto que deseemos a vercel a través de github, en la página de vercel se puede hacer facilmente
+- Luego ponemos: vercel   .En la consola de crmcliente y empezamos a hacer el deployment y la build. Te preguntará si 
+
+
+
 	
 	
 
